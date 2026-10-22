@@ -1,0 +1,55 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: task_manager_backend
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: task_manager
+      DB_USERNAME: root
+      DB_PASSWORD: root_password
+    depends_on:
+      - mysql
+    networks:
+      - task_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: task_manager_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: task_manager
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - task_network
+
+  frontend:
+    image: node:20-alpine
+    container_name: task_manager_frontend
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev -- --host"
+    networks:
+      - task_network
+
+networks:
+  task_network:
+    driver: bridge
+
+volumes:
+  dbdata:

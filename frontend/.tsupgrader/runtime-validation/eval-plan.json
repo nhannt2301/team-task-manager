@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-10-22T12:00:00+07:00",
+  "generatedOnPlatform": "win32",
+  "projectType": "webapp",
+  "setup": [],
+  "assertions": [
+    {
+      "name": "frontend-production-build",
+      "kind": "process",
+      "command": "docker",
+      "args": [
+        "compose",
+        "exec",
+        "-T",
+        "frontend",
+        "npm",
+        "run",
+        "build"
+      ],
+      "verificationMethod": "exit-code",
+      "expected": "0",
+      "timeoutSeconds": 180
+    },
+    {
+      "name": "tests-pass",
+      "kind": "process",
+      "command": "docker",
+      "args": [
+        "compose",
+        "exec",
+        "-T",
+        "frontend",
+        "npm",
+        "test"
+      ],
+      "verificationMethod": "test-results",
+      "expected": "0",
+      "timeoutSeconds": 180
+    },
+    {
+      "name": "frontend-home-served",
+      "kind": "http-probe",
+      "startCommand": "docker",
+      "startArgs": [
+        "compose",
+        "run",
+        "--rm",
+        "--no-deps",
+        "--publish",
+        "5174:5174",
+        "frontend",
+        "npm",
+        "run",
+        "dev",
+        "--",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "5174",
+        "--strictPort"
+      ],
+      "url": "http://localhost:5174/",
+      "verificationMethod": "http-status",
+      "expected": "200",
+      "timeoutSeconds": 120
+    }
+  ]
+}
