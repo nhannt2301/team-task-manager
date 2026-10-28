@@ -3,9 +3,6 @@ name: Backend CI
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-ci.yml'
 
 jobs:
   backend-test:
