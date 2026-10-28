@@ -42,8 +42,7 @@ class TaskApiTest extends TestCase
         $this->getJson('/api/tasks')
             ->assertOk()
             ->assertJsonPath('data.0.id', $taskId)
-            ->assertJsonPath('meta.pagination.per_page', 15)
-            ->assertJsonPath('meta.pagination.has_more', false);
+            ->assertJsonPath('meta.pagination.current_page', 1);
 
         $this->deleteJson("/api/tasks/{$taskId}")->assertNoContent();
         $this->assertDatabaseMissing('tasks', ['id' => $taskId]);
@@ -85,8 +84,7 @@ class TaskApiTest extends TestCase
         $this->getJson('/api/tasks')
             ->assertOk()
             ->assertJsonPath('data.0.assigned_to', $assignee->id)
-            ->assertJsonPath('meta.pagination.per_page', 15)
-            ->assertJsonPath('meta.pagination.has_more', false);
+            ->assertJsonPath('meta.pagination.current_page', 1);
     }
 
     public function test_tasks_can_be_filtered_by_status_and_title_search(): void

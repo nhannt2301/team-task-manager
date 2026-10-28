@@ -43,12 +43,12 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey(), self::LOCKOUT_SECONDS);
 
-            // check soft-delete
+            // check bị soft-delete
             $user = User::withTrashed()->where('email', $credentials['email'])->first();
 
             if ($user && $user->trashed()) {
                 throw ValidationException::withMessages([
-                    'email' => [trans('auth.blocked') ?: 'Account had been locked.'],
+                    'email' => [trans('auth.blocked') ?: 'Tài khoản đã bị vô hiệu hóa.'],
                 ]);
             }
 
