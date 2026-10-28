@@ -40,7 +40,11 @@ trait ApiResponse
         return $this->success($data, 'Created successfully', Response::HTTP_CREATED);
     }
 
-    protected function paginate(mixed $paginator, string $message = 'Success'): JsonResponse
+    protected function paginate(
+        mixed $paginator,
+        string $message = 'Success',
+        ?string $resourceClass = null,
+    ): JsonResponse
     {
         $pagination = $paginator instanceof CursorPaginator
             ? [
@@ -56,8 +60,13 @@ trait ApiResponse
                 'last_page'    => $paginator->lastPage(),
             ];
 
+        $items = $paginator->items();
+        $data = $resourceClass === null
+            ? $items
+            : $resourceClass::collection($items)->resolve(request());
+
         return $this->success(
-            $paginator->items(),
+            $data,
             $message,
             Response::HTTP_OK,
             ['pagination' => $pagination]

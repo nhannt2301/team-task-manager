@@ -2,31 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginRequest;
-use App\Services\AuthService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Services\AuthService;
+use App\Http\Resources\UserResource;
+use App\Http\Requests\Auth\LoginRequest;
 
 class AuthController extends Controller
 {
-    protected AuthService $authService;
-
-    public function __construct(AuthService $authService)
-    {
-        $this->authService = $authService;
-    }
+    public function __construct(private readonly AuthService $authService) {}
 
     /**
      * API: POST /api/login
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        $data = $this->authService->login($request->validated());
+        $user = $request->authenticate();
 
-        return response()->json([
-            'message' => 'success',
-            'data' => $data
-        ], 200);
+        $tokenData = $this->authService->createAuthToken($user);
+
+        return $this->success([
+            'access_token' => $tokenData['access_token'],
+            'token_type'   => $tokenData['token_type'],
+            'user'         => new UserResource($user),
+        ], 'Login successful');
     }
 
     /**
@@ -36,9 +35,7 @@ class AuthController extends Controller
     {
         $this->authService->logout($request->user());
 
-        return response()->json([
-            'message' => 'success'
-        ], 200);
+        return $this->success(null, 'Logged out successfully');
     }
 
     /**
@@ -46,8 +43,9 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
-            'data' => $request->user()
-        ], 200);
+        return $this->success(
+            new UserResource($request->user()),
+            'User profile retrieved successfully'
+        );
     }
 }

@@ -13,6 +13,7 @@ defineProps<{
 
 defineEmits<{
   (e: 'cursor-change', cursor: string | null): void
+  (e: 'edit', task: Task): void
 }>()
 </script>
 
@@ -21,15 +22,26 @@ defineEmits<{
     <v-table hover>
       <thead>
         <tr>
-          <th class="text-left">Task</th>
-          <th class="text-left">Status</th>
-          <th class="text-left">Assignee</th>
-          <th class="text-left">Due date</th>
+          <th class="text-left">
+            Task
+          </th>
+          <th class="text-left">
+            Status
+          </th>
+          <th class="text-left">
+            Assignee
+          </th>
+          <th class="text-left">
+            Due date
+          </th>
           <th aria-label="Actions" />
         </tr>
       </thead>
       <tbody>
-        <tr v-for="task in tasks" :key="task.id">
+        <tr
+          v-for="task in tasks"
+          :key="task.id"
+        >
           <td>
             <RouterLink :to="{ name: 'tasks.detail', params: { id: task.id } }">
               <span class="font-weight-medium text-primary">{{ task.title }}</span>
@@ -43,13 +55,26 @@ defineEmits<{
             </RouterLink>
           </td>
           <td>
-            <v-chip :color="getStatusColor(task.status)" size="small" variant="tonal">
+            <v-chip
+              :color="getStatusColor(task.status)"
+              size="small"
+              variant="tonal"
+            >
               {{ getStatusLabel(task.status) }}
             </v-chip>
           </td>
           <td>{{ task.assignee?.name ?? '—' }}</td>
           <td>{{ formatDate(task.due_date) }}</td>
           <td class="text-right">
+            <v-btn
+              icon="mdi-pencil-outline"
+              variant="text"
+              size="small"
+              color="medium-emphasis"
+              class="mr-1"
+              :aria-label="`Edit ${task.title}`"
+              @click="$emit('edit', task)"
+            />
             <v-btn
               :to="{ name: 'tasks.detail', params: { id: task.id } }"
               icon="mdi-chevron-right"

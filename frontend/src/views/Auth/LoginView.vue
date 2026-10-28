@@ -29,18 +29,47 @@ async function submit() {
 </script>
 
 <template>
-  <v-row align="center" justify="center" class="w-100">
-    <v-col cols="12" sm="9" md="6" lg="4">
-      <v-card class="pa-6 pa-sm-8" rounded="xl" elevation="2">
+  <v-row
+    align="center"
+    justify="center"
+    class="w-100"
+  >
+    <v-col
+      cols="12"
+      sm="9"
+      md="6"
+      lg="4"
+    >
+      <v-card
+        class="pa-6 pa-sm-8"
+        rounded="xl"
+        elevation="2"
+      >
         <div class="text-center mb-7">
-          <v-avatar color="primary" size="56" class="mb-4">
-            <v-icon icon="mdi-clipboard-check-outline" size="30" />
+          <v-avatar
+            color="primary"
+            size="56"
+            class="mb-4"
+          >
+            <v-icon
+              icon="mdi-clipboard-check-outline"
+              size="30"
+            />
           </v-avatar>
-          <h1 class="text-h4 font-weight-bold mb-2">Welcome back</h1>
-          <p class="text-body-2 text-medium-emphasis">Sign in to manage your team tasks.</p>
+          <h1 class="text-h4 font-weight-bold mb-2">
+            Welcome back
+          </h1>
+          <p class="text-body-2 text-medium-emphasis">
+            Sign in to manage your team tasks.
+          </p>
         </div>
 
-        <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-5">
+        <v-alert
+          v-if="errorMessage"
+          type="error"
+          variant="tonal"
+          class="mb-5"
+        >
           {{ errorMessage }}
         </v-alert>
 

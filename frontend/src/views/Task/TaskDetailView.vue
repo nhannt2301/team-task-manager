@@ -86,11 +86,24 @@ watch(() => route.params.id, loadTask)
       >
         All tasks
       </v-btn>
-      <v-progress-linear v-if="loading" indeterminate color="primary" />
-      <v-alert v-else-if="errorMessage" type="error" variant="tonal">
+      <v-progress-linear
+        v-if="loading"
+        indeterminate
+        color="primary"
+      />
+      <v-alert
+        v-else-if="errorMessage"
+        type="error"
+        variant="tonal"
+      >
         {{ errorMessage }}
         <template #append>
-          <v-btn variant="text" @click="loadTask">Retry</v-btn>
+          <v-btn
+            variant="text"
+            @click="loadTask"
+          >
+            Retry
+          </v-btn>
         </template>
       </v-alert>
     </div>
@@ -98,9 +111,18 @@ watch(() => route.params.id, loadTask)
     <template v-if="task && !loading">
       <div class="d-flex align-start justify-space-between flex-wrap ga-4 mb-6">
         <div>
-          <p class="text-overline text-primary font-weight-bold">TASK DETAILS</p>
-          <h1 class="text-h4 font-weight-bold">{{ task.title }}</h1>
-          <v-chip :color="getStatusColor(task.status)" size="small" variant="tonal" class="mt-3">
+          <p class="text-overline text-primary font-weight-bold">
+            TASK DETAILS
+          </p>
+          <h1 class="text-h4 font-weight-bold">
+            {{ task.title }}
+          </h1>
+          <v-chip
+            :color="getStatusColor(task.status)"
+            size="small"
+            variant="tonal"
+            class="mt-3"
+          >
             {{ getStatusLabel(task.status) }}
           </v-chip>
         </div>
@@ -115,7 +137,10 @@ watch(() => route.params.id, loadTask)
       </div>
 
       <v-row>
-        <v-col cols="12" md="8">
+        <v-col
+          cols="12"
+          md="8"
+        >
           <TaskEditForm
             :task="task"
             :saving="saving"
@@ -123,7 +148,10 @@ watch(() => route.params.id, loadTask)
           />
         </v-col>
 
-        <v-col cols="12" md="4">
+        <v-col
+          cols="12"
+          md="4"
+        >
           <TaskInfoCard :task="task" />
         </v-col>
       </v-row>

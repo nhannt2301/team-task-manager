@@ -35,20 +35,31 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $users = User::factory()
-            ->count(10)
-            ->create(['role' => CUser::ROLE_USER, 'password' => Hash::make('password')]);
+        if (User::where('role', CUser::ROLE_USER)->count() <= 1) {
+            User::factory()
+                ->count(10)
+                ->create(['role' => CUser::ROLE_USER, 'password' => Hash::make('password')]);
+        }
 
         $this->seedTasks();
     }
 
     private function seedTasks(): void
     {
+        if (DB::table('tasks')->exists()) {
+            return;
+        }
+
+        $userIds = User::pluck('id')->toArray();
+        if (empty($userIds)) {
+            return;
+        }
+        DB::disableQueryLog();
+
         $total = 1000000;
         $sizeBatch = 1000;
-        // Retrieve valid assignee IDs
-        $userIds = User::pluck('id')->toArray();
 
+        // Retrieve valid assignee IDs
         if (empty($userIds)) {
             $this->command?->warn('No users found. Skipping task seeding.');
             return;
