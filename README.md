@@ -61,15 +61,14 @@ docker compose exec backend composer install
 docker compose exec backend php artisan key:generate
 ```
 
-Wait until MySQL is ready before running the migrations. If the migration
-command cannot connect to the database, wait a few seconds and run it again.
+Wait until MySQL is ready before running the migrations
 
 ```sh
 docker compose exec backend php artisan migrate --seed
 ```
 
 This creates the database tables and loads the demo accounts and sample data.
-The seed creates 100 additional generated users and 1,000 sample tasks.
+The seed creates 100 additional generated users and 1,000,000 sample tasks.
 
 ### 4. Open and sign in
 
