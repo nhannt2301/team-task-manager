@@ -33,13 +33,22 @@ async function handleLogout() {
         class="py-4"
       >
         <template #prepend>
-          <v-icon color="primary" size="large">mdi-checkbox-marked-circle-outline</v-icon>
+          <v-icon
+            color="primary"
+            size="large"
+          >
+            mdi-checkbox-marked-circle-outline
+          </v-icon>
         </template>
       </v-list-item>
 
       <v-divider />
 
-      <v-list density="compact" nav class="mt-2">
+      <v-list
+        density="compact"
+        nav
+        class="mt-2"
+      >
         <v-list-item
           prepend-icon="mdi-format-list-checks"
           title="List task"
@@ -60,7 +69,10 @@ async function handleLogout() {
       <v-spacer />
 
       <!-- User Profile & Action -->
-      <div v-if="authStore.user" class="d-flex align-center ga-3 mr-4">
+      <div
+        v-if="authStore.user"
+        class="d-flex align-center ga-3 mr-4"
+      >
         <div class="text-right d-none d-sm-block">
           <div class="text-subtitle-2 font-weight-bold leading-tight">
             {{ authStore.user.name }}
@@ -91,13 +103,20 @@ async function handleLogout() {
 
     <!-- Main View -->
     <v-main>
-      <v-container fluid class="pa-6">
+      <v-container
+        fluid
+        class="pa-6"
+      >
         <router-view />
       </v-container>
     </v-main>
 
     <!-- Error Snackbar -->
-    <v-snackbar v-model="showLogoutError" color="error" timeout="6000">
+    <v-snackbar
+      v-model="showLogoutError"
+      color="error"
+      timeout="6000"
+    >
       {{ logoutError }}
     </v-snackbar>
   </v-layout>

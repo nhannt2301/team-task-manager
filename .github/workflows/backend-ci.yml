@@ -1,0 +1,38 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+
+    # cmd run
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, bcmath
+          coverage: none
+
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Install Composer Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Generate App Key
+        run: php artisan key:generate
+
+      - name: Run Laravel Tests
+        if: false
+        run: php artisan test

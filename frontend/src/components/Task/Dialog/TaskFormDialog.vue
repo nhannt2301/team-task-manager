@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { getApiErrorMessage } from '@/services/api'
-import { createTask } from '@/services/taskService'
+import { createTask, updateTask } from '@/services/taskService'
 import { listUserAssignees } from '@/services/userService'
 import { useAuthStore } from '@/stores/auth'
 import { TASK_STATUSES } from '@/constants/task'
 import { useNotifications } from '@/composables/useNotifications'
-import type { TaskInput } from '@/types/task'
+import type { Task, TaskInput } from '@/types/task'
 
 interface UserOption {
   id: number
@@ -14,24 +14,39 @@ interface UserOption {
   role?: string
 }
 
-const props = defineProps<{
-  modelValue: boolean
-}>()
+interface FormState extends TaskInput {
+  assigned_to: number | null
+}
+
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    task?: Task | null
+  }>(),
+  {
+    task: null,
+  }
+)
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
-  (e: 'created'): void
+  (e: 'saved'): void
 }>()
 
 const authStore = useAuthStore()
 const { notifySuccess, notifyError } = useNotifications()
+
 const saving = ref(false)
 const loadingUsers = ref(false)
 const users = ref<UserOption[]>([])
 const formError = ref('')
 const titleInputRef = ref<HTMLInputElement | null>(null)
 
-const emptyTask = (): TaskInput & { assigned_to: number | null } => ({
+const isEdit = computed(() => Boolean(props.task?.id))
+const dialogTitle = computed(() => (isEdit.value ? 'Edit task' : 'Create task'))
+const submitButtonText = computed(() => (isEdit.value ? 'Save changes' : 'Create task'))
+
+const emptyTask = (): FormState => ({
   title: '',
   description: null,
   status: 'todo',
@@ -39,7 +54,7 @@ const emptyTask = (): TaskInput & { assigned_to: number | null } => ({
   assigned_to: null,
 })
 
-const form = reactive<TaskInput & { assigned_to: number | null }>(emptyTask())
+const form = reactive<FormState>(emptyTask())
 
 const isOpen = computed({
   get: () => props.modelValue,
@@ -62,12 +77,25 @@ async function loadUsers() {
 watch(
   () => props.modelValue,
   (val) => {
-    if (val) {
+    if (!val) return
+
+    formError.value = ''
+    if (authStore.isAdmin) {
+      loadUsers()
+    }
+
+    if (props.task) {
+      // Map data edit
+      Object.assign(form, {
+        title: props.task.title || '',
+        description: props.task.description || null,
+        status: props.task.status || 'todo',
+        due_date: props.task.due_date ? props.task.due_date.slice(0, 10) : null,
+        assigned_to: props.task.assigned_to ?? null,
+      })
+    } else {
+      // Reset data
       Object.assign(form, emptyTask())
-      formError.value = ''
-      if (authStore.isAdmin) {
-        loadUsers()
-      }
     }
   }
 )
@@ -84,16 +112,24 @@ async function saveTask() {
   formError.value = ''
   saving.value = true
 
+  const payload: FormState = {
+    ...form,
+    title: form.title.trim(),
+    description: form.description?.trim() || null,
+    assigned_to: authStore.isAdmin ? form.assigned_to : null,
+  }
+
   try {
-    await createTask({
-      ...form,
-      title: form.title.trim(),
-      description: form.description?.trim() || null,
-      assigned_to: authStore.isAdmin ? form.assigned_to : null,
-    })
+    if (isEdit.value && props.task?.id) {
+      await updateTask(props.task.id, payload)
+      notifySuccess('Task updated successfully.')
+    } else {
+      await createTask(payload)
+      notifySuccess('Task created successfully.')
+    }
+
     closeDialog()
-    notifySuccess('Task created successfully.')
-    emit('created')
+    emit('saved')
   } catch (error) {
     notifyError(getApiErrorMessage(error))
   } finally {
@@ -103,14 +139,27 @@ async function saveTask() {
 </script>
 
 <template>
-  <v-dialog v-model="isOpen" max-width="560" @after-enter="focusTitleInput">
+  <v-dialog
+    v-model="isOpen"
+    max-width="560"
+    @after-enter="focusTitleInput"
+  >
     <v-card rounded="lg">
-      <v-card-title class="pa-5">Create task</v-card-title>
+      <v-card-title class="pa-5">
+        {{ dialogTitle }}
+      </v-card-title>
       <v-divider />
+
       <v-card-text class="pa-5">
-        <v-alert v-if="formError" type="error" variant="tonal" class="mb-4">
+        <v-alert
+          v-if="formError"
+          type="error"
+          variant="tonal"
+          class="mb-4"
+        >
           {{ formError }}
         </v-alert>
+
         <v-form @submit.prevent="saveTask">
           <v-text-field
             ref="titleInputRef"
@@ -119,6 +168,7 @@ async function saveTask() {
             variant="outlined"
             required
           />
+
           <v-textarea
             v-model="form.description"
             label="Description"
@@ -126,6 +176,7 @@ async function saveTask() {
             rows="3"
             auto-grow
           />
+
           <v-select
             v-if="authStore.isAdmin"
             v-model="form.assigned_to"
@@ -137,12 +188,14 @@ async function saveTask() {
             :loading="loadingUsers"
             clearable
           />
+
           <v-select
             v-model="form.status"
             :items="TASK_STATUSES"
             label="Status"
             variant="outlined"
           />
+
           <v-text-field
             v-model="form.due_date"
             label="Due date"
@@ -152,11 +205,22 @@ async function saveTask() {
           />
         </v-form>
       </v-card-text>
+
       <v-card-actions class="px-5 pb-5">
         <v-spacer />
-        <v-btn variant="text" @click="closeDialog">Cancel</v-btn>
-        <v-btn color="primary" :loading="saving" :disabled="!form.title.trim()" @click="saveTask">
-          Create task
+        <v-btn
+          variant="text"
+          @click="closeDialog"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          color="primary"
+          :loading="saving"
+          :disabled="!form.title.trim()"
+          @click="saveTask"
+        >
+          {{ submitButtonText }}
         </v-btn>
       </v-card-actions>
     </v-card>

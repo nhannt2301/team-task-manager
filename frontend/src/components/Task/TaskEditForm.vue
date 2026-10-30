@@ -79,8 +79,13 @@ function onSubmit() {
 </script>
 
 <template>
-  <v-card rounded="lg" elevation="1">
-    <v-card-title class="pa-5">Edit task</v-card-title>
+  <v-card
+    rounded="lg"
+    elevation="1"
+  >
+    <v-card-title class="pa-5">
+      Edit task
+    </v-card-title>
     <v-divider />
     <v-card-text class="pa-5">
       <v-form @submit.prevent="onSubmit">
@@ -109,7 +114,10 @@ function onSubmit() {
           clearable
         />
         <v-row>
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-select
               v-model="form.status"
               :items="TASK_STATUSES"
@@ -117,7 +125,10 @@ function onSubmit() {
               variant="outlined"
             />
           </v-col>
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-text-field
               v-model="form.due_date"
               label="Due date"

@@ -5,13 +5,14 @@ import { listTasks } from '@/services/taskService'
 import TaskTable from '@/components/Task/TaskTable.vue'
 import TaskFilters, { type TaskFiltersValue } from '@/components/Task/TaskFilters.vue'
 import TaskEmptyState from '@/components/Task/TaskEmptyState.vue'
-import TaskCreateDialog from '@/components/Task/Dialog/CreateDialog.vue'
+import TaskFormDialog from '@/components/Task/Dialog/TaskFormDialog.vue'
 import type { Pagination, Task } from '@/types/task'
 
 const tasks = ref<Task[]>([])
 const pagination = ref<Pagination | null>(null)
 const loading = ref(false)
 const dialog = ref(false)
+const selectedTask = ref<Task | null>(null)
 const errorMessage = ref('')
 const filters = ref<TaskFiltersValue>({ status: null, search: '' })
 let latestRequestId = 0
@@ -42,6 +43,12 @@ function updateFilters(value: TaskFiltersValue) {
 }
 
 function openCreateDialog() {
+  selectedTask.value = null
+  dialog.value = true
+}
+
+function openEditDialog(task: Task) {
+  selectedTask.value = task
   dialog.value = true
 }
 
@@ -52,26 +59,53 @@ onMounted(() => loadTasks())
   <div>
     <div class="d-flex align-center justify-space-between flex-wrap ga-4 mb-7">
       <div>
-        <p class="text-overline text-primary font-weight-bold">WORKSPACE</p>
-        <h1 class="text-h4 font-weight-bold">Tasks</h1>
-        <p class="text-body-2 text-medium-emphasis mt-1">Track and organize your team's work.</p>
+        <p class="text-overline text-primary font-weight-bold">
+          WORKSPACE
+        </p>
+        <h1 class="text-h4 font-weight-bold">
+          Tasks
+        </h1>
+        <p class="text-body-2 text-medium-emphasis mt-1">
+          Track and organize your team's work.
+        </p>
       </div>
-      <v-btn color="primary" prepend-icon="mdi-plus" size="large" @click="openCreateDialog">
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        size="large"
+        @click="openCreateDialog"
+      >
         New task
       </v-btn>
     </div>
 
-    <v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-5">
+    <v-alert
+      v-if="errorMessage"
+      type="error"
+      variant="tonal"
+      class="mb-5"
+    >
       {{ errorMessage }}
       <template #append>
-        <v-btn variant="text" @click="loadTasks()">Retry</v-btn>
+        <v-btn
+          variant="text"
+          @click="loadTasks()"
+        >
+          Retry
+        </v-btn>
       </template>
     </v-alert>
 
-    <v-card rounded="lg" elevation="1">
+    <v-card
+      rounded="lg"
+      elevation="1"
+    >
       <v-card-title class="d-flex align-center justify-space-between py-4">
         <span class="text-h6">All tasks</span>
-        <span v-if="pagination" class="text-body-2 text-medium-emphasis">
+        <span
+          v-if="pagination"
+          class="text-body-2 text-medium-emphasis"
+        >
           {{ pagination.per_page }} per page
         </span>
       </v-card-title>
@@ -80,17 +114,29 @@ onMounted(() => loadTasks())
       <TaskFilters @change="updateFilters" />
       <v-divider />
 
-      <v-progress-linear v-if="loading" indeterminate color="primary" />
+      <v-progress-linear
+        v-if="loading"
+        indeterminate
+        color="primary"
+      />
       <TaskTable
         v-if="tasks.length"
         :tasks="tasks"
         :pagination="pagination"
         :loading="loading"
+        @edit="openEditDialog"
         @cursor-change="loadTasks"
       />
-      <TaskEmptyState v-else-if="!loading && !errorMessage" @create="openCreateDialog" />
+      <TaskEmptyState
+        v-else-if="!loading && !errorMessage"
+        @create="openCreateDialog"
+      />
     </v-card>
 
-    <TaskCreateDialog v-model="dialog" @created="loadTasks()" />
+    <TaskFormDialog
+      v-model="dialog"
+      :task="selectedTask"
+      @saved="loadTasks()"
+    />
   </div>
 </template>

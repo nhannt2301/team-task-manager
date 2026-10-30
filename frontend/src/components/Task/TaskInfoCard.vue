@@ -8,8 +8,13 @@ defineProps<{
 </script>
 
 <template>
-  <v-card rounded="lg" elevation="1">
-    <v-card-title class="pa-5">Task information</v-card-title>
+  <v-card
+    rounded="lg"
+    elevation="1"
+  >
+    <v-card-title class="pa-5">
+      Task information
+    </v-card-title>
     <v-divider />
     <v-list lines="two">
       <v-list-item
@@ -25,7 +30,7 @@ defineProps<{
       <v-list-item
         prepend-icon="mdi-calendar-plus"
         title="Created"
-        :subtitle="new Date(task.created_at).toLocaleDateString()"
+        :subtitle="formatDate(task.created_at)"
       />
     </v-list>
   </v-card>

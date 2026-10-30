@@ -11,29 +11,19 @@ use Illuminate\Validation\ValidationException;
 class AuthService
 {
     /**
-     * Login
+     * Tạo Sanctum Personal Access Token cho User
      */
-    public function login(array $credentials): array
+    public function createAuthToken(User $user, string $deviceName = 'auth_token'): array
     {
-        $user = User::where('email', $credentials['email'])->first();
+        // delete all user tokens
+        // $user->tokens()->delete();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['ValidationException'],
-            ]);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken($deviceName)->plainTextToken;
 
         return [
             'access_token' => $token,
-            'token_type' => 'Bearer',
-            CUser::ROLE_USER => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ]
+            'token_type'   => 'Bearer',
+            'user'         => $user,
         ];
     }
 
